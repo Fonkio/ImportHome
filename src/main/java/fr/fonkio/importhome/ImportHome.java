@@ -74,7 +74,7 @@ public class ImportHome {
 
     public static Connection getConnection() {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             System.out.println("Connection to the MaSuiteHome database :");
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Host :");
@@ -85,6 +85,7 @@ public class ImportHome {
             String user = reader.readLine();
             System.out.println("Password :");
             String password = reader.readLine();
+            System.out.println("Connection in progress ...");
             return DriverManager.getConnection("jdbc:mysql://"+host+"/"+dbname+"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", user, password);
         } catch(SQLException e) {
             e.printStackTrace();
