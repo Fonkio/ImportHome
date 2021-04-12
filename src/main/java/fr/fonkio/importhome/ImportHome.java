@@ -7,8 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ImportHome {
 
@@ -16,6 +15,7 @@ public class ImportHome {
     private static String oldWorld;
     private static String newWorld;
     private static String serverName;
+    private static boolean ignoreOtherWorld;
 
     public static void main(String[] args) throws IOException {
 
@@ -31,12 +31,19 @@ public class ImportHome {
         File[] lf = f.listFiles();
         int nbTot = lf.length;
         System.out.println("There are "+nbTot+" files to read");
-        System.out.println("Old world name :");
+        System.out.println("Old world name : [optional]");
         ImportHome.oldWorld = reader.readLine();
-        System.out.println("New world name :");
+        System.out.println("New world name : [optional]");
         ImportHome.newWorld = reader.readLine();
+        String rep;
+        do {
+            System.out.println("Ignore other world : [y]/n");
+            rep = reader.readLine().toLowerCase();
+        } while (rep.equals("y") || rep.equals("n"));
+        ImportHome.ignoreOtherWorld = rep.equals("y");
         System.out.println("Bungee server name :");
         ImportHome.serverName = reader.readLine();
+
         try {
             ImportHome.conn.setAutoCommit(false);
         } catch (SQLException e1) {
@@ -120,23 +127,24 @@ public class ImportHome {
 
 
         for (String homei: homes.keySet()) {
-            Map<String, Object> detailHome =  (Map<String, Object>) homes.getOrDefault(homei, new HashMap<String, Object>());
-            System.out.println(homei+" :");
-            System.out.println(detailHome.values());
-            String sql = "INSERT INTO masuite_homes (name, owner, server, world, x, y, z, yaw, pitch) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement stmtInsert = ImportHome.conn.prepareStatement(sql);
-            stmtInsert.setString(1, homei);
-            stmtInsert.setString(2, uuid);
-            stmtInsert.setString(3, ImportHome.serverName);
-            stmtInsert.setString(4, ((String)detailHome.get("world")).replace(ImportHome.oldWorld, ImportHome.newWorld));
-            stmtInsert.setDouble(5, (Double) detailHome.get("x"));
-            stmtInsert.setDouble(6, (Double) detailHome.get("y"));
-            stmtInsert.setDouble(7, (Double) detailHome.get("z"));
-            stmtInsert.setDouble(8, (Double) detailHome.get("yaw"));
-            stmtInsert.setDouble(9, (Double) detailHome.get("pitch"));
-            stmtInsert.executeUpdate();
-            stmtInsert.close();
-
+            Map<String, Object> detailHome = (Map<String, Object>) homes.getOrDefault(homei, new HashMap<String, Object>());
+            if (ImportHome.ignoreOtherWorld && detailHome.get("world").equals(ImportHome.oldWorld)) {
+                System.out.println(homei + " :");
+                System.out.println(detailHome.values());
+                String sql = "INSERT INTO masuite_homes (name, owner, server, world, x, y, z, yaw, pitch) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement stmtInsert = ImportHome.conn.prepareStatement(sql);
+                stmtInsert.setString(1, homei);
+                stmtInsert.setString(2, uuid);
+                stmtInsert.setString(3, ImportHome.serverName);
+                stmtInsert.setString(4, ((String) detailHome.get("world")).replace(ImportHome.oldWorld, ImportHome.newWorld));
+                stmtInsert.setDouble(5, (Double) detailHome.get("x"));
+                stmtInsert.setDouble(6, (Double) detailHome.get("y"));
+                stmtInsert.setDouble(7, (Double) detailHome.get("z"));
+                stmtInsert.setDouble(8, (Double) detailHome.get("yaw"));
+                stmtInsert.setDouble(9, (Double) detailHome.get("pitch"));
+                stmtInsert.executeUpdate();
+                stmtInsert.close();
+            }
         }
 
     }
