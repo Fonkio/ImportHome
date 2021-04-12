@@ -31,15 +31,18 @@ public class ImportHome {
         File[] lf = f.listFiles();
         int nbTot = lf.length;
         System.out.println("There are "+nbTot+" files to read");
-        System.out.println("Old world name : [optional]");
+        System.out.println("Old world name : [Optional] (if you want to ignore the other worlds, enter the name of the world to keep)");
         ImportHome.oldWorld = reader.readLine();
-        System.out.println("New world name : [optional]");
+        System.out.println("Change world name : [Optional]");
         ImportHome.newWorld = reader.readLine();
+        if (ImportHome.newWorld.equals("")) {
+            ImportHome.newWorld = ImportHome.oldWorld;
+        }
         String rep;
         do {
             System.out.println("Ignore other world : [y]/n");
             rep = reader.readLine().toLowerCase();
-        } while (rep.equals("y") || rep.equals("n"));
+        } while (!(rep.equals("y") || rep.equals("n")));
         ImportHome.ignoreOtherWorld = rep.equals("y");
         System.out.println("Bungee server name :");
         ImportHome.serverName = reader.readLine();
